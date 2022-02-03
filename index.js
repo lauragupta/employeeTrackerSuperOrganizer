@@ -1,4 +1,8 @@
+//Import requirements and their consts
+const express = require('express');
+const mysql = require('mysql2');
 const inquirer = require('inquirer');
+const cTable = require('console.table');
 
 //Starting question
 const startQuestion = [
@@ -64,4 +68,33 @@ const addEmployeeQuestions = [
         choices: `[${managerList}]`
     }
 ];
+
+//Start Inquirer and next step function
+function askStartQuestion() {
+    inquirer.prompt(startQuestion).then((response) => {
+        if(response.startQuestion === 'View All Employees') {
+            //cTable = 
+        } else if(response.startQuestion === 'View All Departments') {
+            //cTable = 
+        } else if(response.startQuestion === 'Add Depeartment') {
+            
+        } else if(response.startQuestion === 'Add Role') {
+
+        } else if(response.startQuestion === 'Add Employee') {
+
+        }else if (response.startQuestion === 'Update Employee Role') {
+
+        }else if (response.startQuestion === 'Quit') {
+
+        }
+    })
+}
+
+//Add Department function
+
+//Add Role function
+
+//Add Employee function
+
+//Update Employee function
 
