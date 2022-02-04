@@ -3,14 +3,13 @@ const express = require('express');
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
+// const { table } = require('console');
 
 // Connect to database
 const db = mysql.createConnection(
     {
       host: 'localhost',
-      // MySQL username,
       user: 'root',
-      // TODO: Add MySQL password here
       password: 'password',
       database: 'business_db'
     },
@@ -19,7 +18,7 @@ const db = mysql.createConnection(
 const departmentList = `SELECT * FROM department.name`;
 const roleList = `SELECT * FROM role.title`;
 const managerList = `SELECT first_name, last_name FROM employee WHERE employee.id = employee.manager_id`
-const employeeList = `SELECT * FROM employee`
+const employeeList = `SELECT * FROM employee ORDER BY employee.last_name;`
 
 //Starting question
 const startQuestion = [
@@ -90,20 +89,15 @@ const addEmployeeQuestions = [
 function askStartQuestion() {
     inquirer.prompt(startQuestion).then((response) => {
         if(response.startQuestion === 'View All Employees') {
-            const sql = `SELECT employee.id AS id, employee.first_name AS firstName, employee.last_Name AS lastName, employee.role AS role, employee.manager_id AS manager ORDER BY employee.last_name;`;
-            db.query(sql, (err, rows) => {
-                if (err) {
-                    res.status(500).json({ error:err.message});
-                        return;
-                }
-                res.json({
-                    message: 'success', 
-                    data: rows
-                });
+            db.query(`SELECT * FROM employee ORDER BY employee.last_name`, function (err, results) {
+                console.log(results); 
+                askStartQuestion();
             });
-            //cTable = SELECT??
         } else if(response.startQuestion === 'View All Departments') {
-            //cTable = 
+            db.query(`SELECT * FROM departments ORDER BY employee.last_name`, function (err, results) {
+                console.log(results); 
+                askStartQuestion();
+            });
         } else if(response.startQuestion === 'Add Depeartment') {
             
         } else if(response.startQuestion === 'Add Role') {
@@ -113,7 +107,7 @@ function askStartQuestion() {
         }else if (response.startQuestion === 'Update Employee Role') {
 
         }else if (response.startQuestion === 'Quit') {
-
+            return;
         }
     })
 }
