@@ -15,10 +15,11 @@ const db = mysql.createConnection(
     },
     console.log(`Connected to the business_db database.`)
   );
-const departmentList = `SELECT * FROM department.name`;
+const departmentList = `SELECT * FROM department;`;
 const roleList = `SELECT * FROM role.title`;
 const managerList = `SELECT first_name, last_name FROM employee WHERE employee.id = employee.manager_id`
 const employeeList = `SELECT * FROM employee ORDER BY employee.last_name;`
+const listDepartments = `SELECT name FROM department;`
 
 //Starting question
 const startQuestion = [
@@ -31,7 +32,7 @@ const startQuestion = [
 ];
 
 //Department question
-const addDepeartmentQuestions = [
+const addDepeartmentQuestion = [
     {
         name: 'department',
         message: "What is the name of the department?",
@@ -55,7 +56,7 @@ const addRoleQuestions = [
         name: 'roleDepartment',
         message: "Which department does the role belong to?",
         type: 'list',
-        choices: `[${departmentList}]`
+        choices: []
     }
 ];
 
@@ -89,19 +90,57 @@ const addEmployeeQuestions = [
 function askStartQuestion() {
     inquirer.prompt(startQuestion).then((response) => {
         if(response.startQuestion === 'View All Employees') {
-            db.query(`SELECT * FROM employee ORDER BY employee.last_name`, function (err, results) {
-                console.log(results); 
+            db.query(employeeList, function (err, results) {
+               console.table(results);
                 askStartQuestion();
             });
         } else if(response.startQuestion === 'View All Departments') {
-            db.query(`SELECT * FROM departments ORDER BY employee.last_name`, function (err, results) {
-                console.log(results); 
+            db.query(departmentList, function (err, results) {
+                console.table(results); 
                 askStartQuestion();
             });
         } else if(response.startQuestion === 'Add Depeartment') {
-            
+            inquirer.prompt(addDepeartmentQuestion).then((response) => {
+                const newDepartment = response.department;
+                console.log(newDepartment);
+                db.query(`INSERT INTO department (name) VALUES ('${newDepartment}');`, function(err, results) {
+                    console.log(results);
+                });
+                askStartQuestion();
+            });
         } else if(response.startQuestion === 'Add Role') {
-
+            db.query(departmentList, function (err, results) {
+                //Add a Role
+                const addRoleQuestions = [
+                    {
+                        name: 'role',
+                        message: "What is the name of the role?",
+                        type: 'input',
+                    },
+                    {
+                        name: 'roleSalary',
+                        message: "What is the salary of the role?",
+                        type: 'input',
+                    },
+                    {
+                        name: 'roleDepartment',
+                        message: "Which department does the role belong to?",
+                        type: 'list',
+                        choices: results
+                    }
+                ];
+                inquirer.prompt(addRoleQuestions).then((response) => {
+                    let newRoleDepartment = response.roleDepartment;
+                    db.query(`SELECT id FROM department WHERE name = '${newRoleDepartment}';`, function (err, results) {
+                        console.log(results);
+                        const deptID = results[0].id;
+                        db.query(`INSERT INTO role (title, salary, department_id) VALUES ('${response.role}', '${response.roleSalary}', '${deptID}');`, function(err, results) {
+                            console.log(results);
+                            askStartQuestion();
+                        });
+                    });
+                });
+            });
         } else if(response.startQuestion === 'Add Employee') {
 
         }else if (response.startQuestion === 'Update Employee Role') {
@@ -112,7 +151,6 @@ function askStartQuestion() {
     })
 }
 
-//Add Department function
 
 //Add Role function
 
