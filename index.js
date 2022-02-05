@@ -16,10 +16,10 @@ const db = mysql.createConnection(
     console.log(`Connected to the business_db database.`)
   );
 const departmentList = `SELECT * FROM department;`;
-const roleList = `SELECT * FROM role.title`;
-const managerList = `SELECT first_name, last_name FROM employee WHERE employee.id = employee.manager_id`
-const employeeList = `SELECT * FROM employee ORDER BY employee.last_name;`
-const listDepartments = `SELECT name FROM department;`
+const roleList = `SELECT * FROM role;`;
+const managerList = `SELECT id, first_name, last_name, manager_id FROM employee WHERE manager_id IS null;`;
+const employeeList = `SELECT * FROM employee ORDER BY employee.last_name;`;
+const listDepartments = `SELECT name FROM department;`;
 
 //Starting question
 const startQuestion = [
@@ -40,51 +40,7 @@ const addDepeartmentQuestion = [
     }
 ];
 
-//Add a Role
-const addRoleQuestions = [
-    {
-        name: 'role',
-        message: "What is the name of the role?",
-        type: 'input',
-    },
-    {
-        name: 'roleSalary',
-        message: "What is the salary of the role?",
-        type: 'input',
-    },
-    {
-        name: 'roleDepartment',
-        message: "Which department does the role belong to?",
-        type: 'list',
-        choices: []
-    }
-];
 
-//Add an Employee
-const addEmployeeQuestions = [
-    {
-        name: 'firstName',
-        message: "What is the employee's first name?",
-        type: 'input',
-    },
-    {
-        name: 'lastName',
-        message: "What is the employee's last name?",
-        type: 'input',
-    },
-    {
-        name: 'employeeRole',
-        message: "What is the employee's role?",
-        type: 'list',
-        choices: `[${roleList}]`
-    },
-    {
-        name: 'employeeManager',
-        message: "Who is the employee's manager?",
-        type: 'list',
-        choices: `[${managerList}]`
-    }
-];
 
 //Start Inquirer and next step function
 function askStartQuestion() {
@@ -142,17 +98,62 @@ function askStartQuestion() {
                 });
             });
         } else if(response.startQuestion === 'Add Employee') {
-
+            db.query(roleList, function (err, roleResponse) {
+                let roleTitles = roleResponse.map(function(roleResponseItem) {
+                    let newRoleID = {
+                        id: roleResponseItem.id,
+                        name: roleResponseItem.title
+                    }
+                    return newRoleID;
+                })
+                db.query(managerList, function (err, managerResults) {
+                    console.log(managerResults);
+                    let managers = managerResults.map(function(row) {
+                        let newManagers = {
+                            id: row.id,
+                            name: row.first_name
+                        }
+                        console.log(`managers `, newManagers);
+                        return newManagers;
+                    })
+                    //Add an Employee
+                    const addEmployeeQuestions = [
+                        {
+                            name: 'firstName',
+                            message: "What is the employee's first name?",
+                            type: 'input',
+                        },
+                        {
+                            name: 'lastName',
+                            message: "What is the employee's last name?",
+                            type: 'input',
+                        },
+                        {
+                            name: 'employeeRole',
+                            message: "What is the employee's role?",
+                            type: 'list',
+                            choices: roleTitles
+                        },
+                        {
+                            name: 'employeeManager',
+                            message: "Who is the employee's manager?",
+                            type: 'list',
+                            choices: managers
+                        }
+                    ];
+                    inquirer.prompt(addEmployeeQuestions).then((response) => {
+                        console.log(response);
+                    });
+                });
+            });
         }else if (response.startQuestion === 'Update Employee Role') {
 
         }else if (response.startQuestion === 'Quit') {
             return;
         }
-    })
+    });
 }
 
-
-//Add Role function
 
 //Add Employee function
 
