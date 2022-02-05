@@ -143,6 +143,18 @@ function askStartQuestion() {
                     ];
                     inquirer.prompt(addEmployeeQuestions).then((response) => {
                         console.log(response);
+                        db.query(`SELECT id FROM role WHERE title = '${response.employeeRole}';`, function (err, results) {
+                            console.log(results);
+                            const roleID = results[0].id;
+                            db.query(`SELECT id FROM employee WHERE first_name = '${response.employeeManager}';`, function (err, results) {
+                                console.log(results);
+                                const managerID = results[0].id;
+                                db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${response.firstName}', '${response.lastName}', '${roleID}', '${managerID}');`, function(err, results) {
+                                    console.log(results);
+                                    askStartQuestion();
+                                });
+                            });
+                        });
                     });
                 });
             });
