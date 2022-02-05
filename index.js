@@ -3,6 +3,7 @@ const express = require('express');
 const mysql = require('mysql2');
 const inquirer = require('inquirer');
 const cTable = require('console.table');
+const { all } = require('express/lib/application');
 // const { table } = require('console');
 
 // Connect to database
@@ -20,6 +21,7 @@ const roleList = `SELECT * FROM role;`;
 const managerList = `SELECT id, first_name, last_name, manager_id FROM employee WHERE manager_id IS null;`;
 const employeeList = `SELECT * FROM employee ORDER BY employee.last_name;`;
 const listDepartments = `SELECT name FROM department;`;
+const allEmployeeFirstName = `SELECT id, first_name, last_name FROM employee;`;
 
 //Starting question
 const startQuestion = [
@@ -159,8 +161,51 @@ function askStartQuestion() {
                 });
             });
         }else if (response.startQuestion === 'Update Employee Role') {
-
+            db.query(roleList, function (err, roleResponse) {
+                let roleTitles = roleResponse.map(function(roleResponseItem) {
+                    let newRoleID = {
+                        value: roleResponseItem.id,
+                        name: roleResponseItem.title
+                    }
+                    console.log('jobs', newRoleID)
+                    return newRoleID;
+                });
+                console.log('jobsTitles', roleTitles)
+                db.query(allEmployeeFirstName, function (err, employeeResults) {
+                    console.log(employeeResults);
+                    let updatingEmployee = employeeResults.map(function(row) {
+                        let currentEmployee = {
+                            value: row.id,
+                            name: row.first_name
+                        }
+                        console.log(`employee `, currentEmployee);
+                        return currentEmployee;
+                    })
+                    const updateEmployeeQuestions = [
+                        {
+                            name: 'updateEmployee',
+                            message: "What is the name of the employee to update their role?",
+                            type: 'list',
+                            choices: updatingEmployee,
+                        },
+                        {
+                            name: 'newRole',
+                            message: "What is the new role the employee will perform?",
+                            type: 'list',
+                            choices: roleTitles,
+                        },
+                    ];
+                    inquirer.prompt(updateEmployeeQuestions).then((response) => {
+                        console.log(response);
+                        db.query(`UPDATE employee SET role_id = "${response.newRole}" WHERE id = ${response.updateEmployee};`, function(err, results) {
+                            console.log(results);
+                            askStartQuestion();
+                        });
+                    });
+                });
+            });
         }else if (response.startQuestion === 'Quit') {
+            console.log("Adios!")
             return;
         }
     });
