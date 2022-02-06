@@ -4,7 +4,7 @@
 
 ## Description  
 
-This is a project is a content management system (CMS) for a comapny to manage their departments, employees and roles. It uses MySQL and Node.js including inquirer, and mysql2, to get information from a database and add information to the database. 
+This project is a content management system (CMS) for a comapny to manage their departments, employees and roles. It uses MySQL and Node.js including inquirer, and mysql2, to get information from a database and add information to the database. 
 
 
 ## Table of Contents   
@@ -26,7 +26,7 @@ First, you will need to Clone the repository and go to that folder. Then, you wi
 
 Here is a video of a walkthrough of this project.
 
-![Coming Soon]()
+![Walkthrough Video](https://watch.screencastify.com/v/7GIAKYm74hHCVnP2qYLB)
 
 
 ## Built With
